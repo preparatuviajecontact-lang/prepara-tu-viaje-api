@@ -9,11 +9,12 @@ import { authApiKey } from './middlewares/auth.js';
 
 const app = express();
 app.use(express.json());
-app.use(cors((req, callback) => {
-  callback(null, { 
-    origin: req.header('Origin'), 
-    allowedHeaders: ["Content-Type", "x-api-key"] 
-  });
+app.use(cors({
+  origin: [
+    "https://preparatuviajeapp.com",
+    "https://www.preparatuviajeapp.com",
+  ],
+  allowedHeaders: ["Content-Type", "x-api-key"]
 }));
 
 app.get("/health", (req, res) => {
@@ -23,54 +24,55 @@ app.get("/health", (req, res) => {
 // MODO 1 SE LE PASARÁN LAS COORDENADAS DE ORIGEN Y DESTINO
 app.get('/api/v1/coord-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => {
     try {
-      const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
+        const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
 
-      const originArray = origin.split(',').map(Number);
-      const destArray = destination.split(',').map(Number);
+        const originArray = origin.split(',').map(Number);
+        const destArray = destination.split(',').map(Number);
 
-      const vehicleType = Number(vehicleTypeKey);
-      const octane = Number(vehicleOctane);
-      const performance = Number(vehiclePerformance);
+        const vehicleType = Number(vehicleTypeKey);
+        const octane = Number(vehicleOctane);
+        const performance = Number(vehiclePerformance);
 
-      const isValidCoord = (arr) =>
-        arr.length === 2 && arr.every(n => !isNaN(n));
+        const isValidCoord = (arr) =>
+            arr.length === 2 && arr.every(n => !isNaN(n));
 
-      if (!isValidCoord(originArray) || !isValidCoord(destArray)) {
-        return res.status(400).json({
-          error: "Formato de coordenadas inválido. Usa: lat,lng"
+        if (!isValidCoord(originArray) || !isValidCoord(destArray)) {
+            return res.status(400).json({
+                error: "Formato de coordenadas inválido. Usa: lat,lng"
+            });
+        }
+
+        const { coordinates, distance, routeSteps } = await getRoute(originArray, destArray);
+        const { nearbyPolylineTolls, totalTollCost } = await determinateTolls(coordinates, vehicleType);
+        
+        const { totalCost, totalFuelSpent } = await getRouteCost(
+            totalTollCost,
+            distance,
+            octane,
+            performance,
+            originArray
+        );
+
+        res.json({
+            success: true,
+            totalTollCost,
+            totalFuelSpent,
+            totalCost,
+            count: nearbyPolylineTolls.length,
+            distance,
+            tolls: nearbyPolylineTolls,
+            routeSteps,
+            polyline: coordinates
         });
-      }
 
-      const { coordinates, distance, routeSteps } = await getRoute(originArray, destArray);
-      const { nearbyPolylineTolls, totalTollCost } = await determinateTolls(coordinates, vehicleType);
-      const { totalCost, totalFuelSpent } = await getRouteCost(
-        totalTollCost,
-        distance,
-        octane,
-        performance,
-        originArray
-      );
-
-      res.json({
-        success: true,
-        totalTollCost,
-        totalFuelSpent,
-        totalCost,
-        count: nearbyPolylineTolls.length,
-        distance,
-        tolls: nearbyPolylineTolls,
-        routeSteps,
-        polyline: coordinates
-      });
-
-      registerApiUsage(req.apiKey).catch(console.error);
+        registerApiUsage(req.apiKey).catch(console.error);
 
     } catch (error) {
-      console.error("Error en /coord-mode:", error);
-      res.status(500).json({
-        message: "Error interno del servidor",
-        details: error.message
-      });
+        console.error("Error en /coord-mode:", error);
+        res.status(500).json({
+            message: "Error interno del servidor",
+            details: error.message
+        });
     }
   }
 );
@@ -83,6 +85,7 @@ app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane
 
         const startCoordinates = await fetchCoordinates(origin);
         const endCoordinates = await fetchCoordinates(destination);
+
 
         if (!startCoordinates) {
             return res.status(404).json({ error: `No se pudo geocodificar el origen: ${origin}` });
@@ -107,7 +110,7 @@ app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane
 
         if (!isValidCoord(originArray) || !isValidCoord(destArray)) {
             return res.status(400).json({
-            error: "Coordenadas inválidas obtenidas desde geocodificación"
+                error: "Coordenadas inválidas obtenidas desde geocodificación"
             });
         }
 
