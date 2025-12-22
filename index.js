@@ -84,11 +84,7 @@ app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane
         const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
 
         const startCoordinates = await fetchCoordinates(origin);
-        console.log(`[ENDPOINT] startCoordinates:`, startCoordinates);
-
         const endCoordinates = await fetchCoordinates(destination);
-        console.log(`[ENDPOINT] endCoordinates:`, endCoordinates);
-
 
         if (!startCoordinates) {
             return res.status(404).json({ error: `No se pudo geocodificar el origen: ${origin}` });
