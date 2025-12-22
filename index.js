@@ -10,7 +10,6 @@ import { authApiKey } from './middlewares/auth.js';
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: "*",
   allowedHeaders: ["Content-Type", "x-api-key"]
 }));
 
