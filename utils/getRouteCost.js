@@ -10,9 +10,19 @@ export const getRouteCost = async (totalTollCost, distance, vehicleOctane, vehic
     // Precio del combustible (valor numérico)
     const getFuelPrice = async () => {
         const fuelPrices = await getFuelPrices(originArray);
-        const raw = fuelPrices.fuelData[vehicleOctane].price.replace('$', '');
-        return Math.round(Number(raw)); // number real
+
+        const fuel = fuelPrices.fuelData.find(f =>
+            f.fuelType.startsWith(vehicleOctane.toString())
+        );
+
+        if (!fuel) {
+            throw new Error(`No se encontró precio para octanaje ${vehicleOctane}`);
+        }
+
+        const raw = fuel.price.replace('$', '');
+        return Math.round(Number(raw));
     };
+
 
     const getTotalFuelSpent = async () => {
         const litersNeeded = getLitersNeeded();
