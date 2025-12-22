@@ -1,131 +1,41 @@
-import cors from "cors";
-import express from 'express';
-import { getRoute } from "./utils/getRoute.js";
-import { determinateTolls } from "./utils/determinateTolls.js";
-import { getRouteCost } from './utils/getRouteCost.js';
-import { fetchStartCoordinates, fetchEndCoordinates } from './utils/fetchCoordinates.js';
-import { registerApiUsage } from './utils/registerApiUsage.js';
-import { authApiKey } from './middlewares/auth.js';
+import { getFuelPrices } from "./getFuelPrices.js";
 
-const app = express();
-app.use(express.json());
-app.use(cors({
-  origin: [
-    "https://preparatuviajeapp.com",
-    "https://www.preparatuviajeapp.com",
-  ],
-  allowedHeaders: ["Content-Type", "x-api-key"]
-}));
+export const getRouteCost = async (totalTollCost, distance, vehicleOctane, vehiclePerformance, originArray) => {
 
+    // Combustible necesario (litros)
+    const getLitersNeeded = () => {
+        return Number(distance) / Number(vehiclePerformance);
+    };
 
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
-});
+    // Precio del combustible (valor numérico)
+    const getFuelPrice = async () => {
+        const fuelPrices = await getFuelPrices(originArray);
+        const raw = fuelPrices.fuelData[vehicleOctane].price.replace('$', '');
+        return Math.round(Number(raw)); // number real
+    };
 
-// MODO 1 SE LE PASARÁN LAS COORDENADAS DE ORIGEN Y DESTINO
-app.get('/api/v1/coord-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => { 
-    
+    const getTotalFuelSpent = async () => {
+        const litersNeeded = getLitersNeeded();
+        const fuelPrice = await getFuelPrice();
+        return Math.round(litersNeeded * fuelPrice);
+    };
+
+    const totalFuelSpent = await getTotalFuelSpent()
+
+    const getTotalCost = async () => {
+        const totalFuelCost = totalFuelSpent
+        return Number(totalTollCost) + totalFuelCost;
+    };
+
     try {
-        const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
+        const result = await getTotalCost();
 
-        const originArray = origin.split(',').map(Number);
-        const destArray = destination.split(',').map(Number);
-
-        const vehicleType = Number(vehicleTypeKey);
-        const octane = Number(vehicleOctane);
-        const performance = Number(vehiclePerformance);
-
-        if (originArray.length !== 2 || destArray.length !== 2) {
-            return res.status(400).json({ error: "Formato de coordenadas inválido. Usa: lat,lng" });
-        }
-
-        const {coordinates, distance, routeSteps} = await getRoute(originArray, destArray);
-        const {nearbyPolylineTolls, totalTollCost} = await determinateTolls(coordinates, vehicleType);
-        const {totalCost, totalFuelSpent} = await getRouteCost(totalTollCost, distance, octane, performance, originArray)
-
-        res.json({
-            success: true,
-            totalTollCost,
-            totalFuelSpent,
-            totalCost,
-            count: nearbyPolylineTolls.length,
-            distance,
-            tolls: nearbyPolylineTolls,
-            routeSteps,
-            polyline: coordinates
-        });
-
-        await registerApiUsage(req.apiKey).catch(console.error);
-
+        return {
+            totalCost: Math.round(result),
+            totalFuelSpent
+        };
 
     } catch (error) {
-        console.error("Error en el endpoint1:", error);
-        res.status(500).json({ error: "Error interno del servidor", error });
+        console.error(error);
     }
-});
-
-// MODO 2 SE LE PASARÁN LOS NOMBRES DEL LUGAR DE ORIGEN Y DESTINO
-app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => { 
-    try {
-        const { vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
-
-        const originDecoded = decodeURIComponent(origin);
-        const destinationDecoded = decodeURIComponent(destination);
-
-        const startCoordinates = await fetchStartCoordinates(originDecoded);
-        const endCoordinates = await fetchEndCoordinates(destinationDecoded);
-
-        if (!startCoordinates || !endCoordinates) {
-            return res.status(400).json({
-                error: "No se pudieron resolver las coordenadas del lugar"
-            });
-        }
-        
-        const vehicleType = Number(vehicleTypeKey);
-        const octane = Number(vehicleOctane);
-        const performance = Number(vehiclePerformance);
-
-
-        const originArray = [
-            Number(startCoordinates.lat),
-            Number(startCoordinates.lon)
-        ];
-
-        const destArray = [
-            Number(endCoordinates.lat),
-            Number(endCoordinates.lon)
-        ];
-
-        if (originArray.length !== 2 || destArray.length !== 2) {
-            return res.status(400).json({ error: "Formato de coordenadas inválido. Usa: lat,lng" });
-        }
-
-        const {coordinates, distance, routeSteps} = await getRoute(originArray, destArray);
-        const {nearbyPolylineTolls, totalTollCost} = await determinateTolls(coordinates, vehicleType);
-        const {totalCost, totalFuelSpent} = await getRouteCost(totalTollCost, distance, octane, performance, originArray)
-
-        res.json({
-            success: true,
-            totalTollCost,
-            totalFuelSpent,
-            totalCost,
-            count: nearbyPolylineTolls.length,
-            distance,
-            tolls: nearbyPolylineTolls,
-            routeSteps,
-            polyline: coordinates
-        });
-
-        await registerApiUsage(req.apiKey).catch(console.error);
-
-        
-    } catch (error) {
-        console.error("Error en el endpoint2:", error);
-        res.status(500).json({ error: "Error interno del servidor", error });
-    }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor API listo en puerto ${PORT}`);
-});
+};
