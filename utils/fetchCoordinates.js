@@ -26,6 +26,8 @@ const latinAmericanCountries = [
 
 export const fetchCoordinates = async (term) => {
     try {
+        console.log(`[GEOCODE] Buscando coordenadas para: "${term}"`); // log 1
+
         const response = await axios.get(
             `https://eu1.locationiq.com/v1/search.php`,
             {
@@ -34,23 +36,28 @@ export const fetchCoordinates = async (term) => {
                     q: term,
                     format: "json",
                     addressdetails: 1,
-                    countrycodes: latinAmericanCountries.join(",")
+                    countrycodes: latinAmericanCountries.join(","),
+                    limit: 1
                 }
             }
         );
 
+        console.log(`[GEOCODE] Response status: ${response.status}`); // log 2
+        console.log(`[GEOCODE] Data recibida:`, response.data);       // log 3
+
         const location = response.data.find(item => item.lat && item.lon);
 
-        if (!location) return null;
+        if (!location) {
+            console.warn(`[GEOCODE] No se encontró ubicación para: "${term}"`); // log 4
+            return null;
+        }
 
-        return { 
-            lat: Number(location.lat), 
-            lon: Number(location.lon) 
-        };
+        console.log(`[GEOCODE] Coordenadas encontradas: lat=${location.lat}, lon=${location.lon}`); // log 5
+
+        return { lat: Number(location.lat), lon: Number(location.lon) };
 
     } catch (error) {
-        console.error("Error al obtener coordenadas:", error.message);
+        console.error(`[GEOCODE] Error al obtener coordenadas para "${term}":`, error.message);
         return null;
     }
 };
-
