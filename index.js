@@ -60,7 +60,7 @@ app.get('/api/v1/coord-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/
 
     } catch (error) {
         console.error("Error en el endpoint1:", error);
-        res.status(500).json({ error: "Error interno del servidor" });
+        res.status(500).json({ error: "Error interno del servidor", error });
     }
 });
 
@@ -111,7 +111,7 @@ app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane
         
     } catch (error) {
         console.error("Error en el endpoint2:", error);
-        res.status(500).json({ error: "Error interno del servidor" });
+        res.status(500).json({ error: "Error interno del servidor", error });
     }
 });
 
