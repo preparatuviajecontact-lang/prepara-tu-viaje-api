@@ -9,9 +9,11 @@ import { authApiKey } from './middlewares/auth.js';
 
 const app = express();
 app.use(express.json());
-app.use(cors({
-  origin:"*",
-  allowedHeaders: ["Content-Type", "x-api-key"]
+app.use(cors((req, callback) => {
+  callback(null, { 
+    origin: req.header('Origin'), 
+    allowedHeaders: ["Content-Type", "x-api-key"] 
+  });
 }));
 
 app.get("/health", (req, res) => {
