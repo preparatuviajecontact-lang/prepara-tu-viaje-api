@@ -10,6 +10,10 @@ import { authApiKey } from './middlewares/auth.js';
 const app = express();
 app.use(express.json());
 app.use(cors({
+  origin: [
+    "https://preparatuviajeapp.com",
+    "https://www.preparatuviajeapp.com",
+  ],
   allowedHeaders: ["Content-Type", "x-api-key"]
 }));
 
