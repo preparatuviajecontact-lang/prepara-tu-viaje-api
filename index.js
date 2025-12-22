@@ -31,13 +31,17 @@ app.get('/api/v1/coord-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/
         const originArray = origin.split(',').map(Number);
         const destArray = destination.split(',').map(Number);
 
+        const vehicleType = Number(vehicleTypeKey);
+        const octane = Number(vehicleOctane);
+        const performance = Number(vehiclePerformance);
+
         if (originArray.length !== 2 || destArray.length !== 2) {
             return res.status(400).json({ error: "Formato de coordenadas inválido. Usa: lat,lng" });
         }
 
         const {coordinates, distance, routeSteps} = await getRoute(originArray, destArray);
-        const {nearbyPolylineTolls, totalTollCost} = await determinateTolls(coordinates, vehicleTypeKey);
-        const {totalCost, totalFuelSpent} = await getRouteCost(totalTollCost, distance, vehicleOctane, vehiclePerformance, originArray)
+        const {nearbyPolylineTolls, totalTollCost} = await determinateTolls(coordinates, vehicleType);
+        const {totalCost, totalFuelSpent} = await getRouteCost(totalTollCost, distance, octane, performance, originArray)
 
         res.json({
             success: true,
@@ -68,6 +72,10 @@ app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane
         const startCoordinates = await fetchStartCoordinates(origin);
         const endCoordinates = await fetchEndCoordinates(destination);
         
+        const vehicleType = Number(vehicleTypeKey);
+        const octane = Number(vehicleOctane);
+        const performance = Number(vehiclePerformance);
+
         const originArray = [
             Number(startCoordinates.lat),
             Number(startCoordinates.lon)
@@ -83,8 +91,8 @@ app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane
         }
 
         const {coordinates, distance, routeSteps} = await getRoute(originArray, destArray);
-        const {nearbyPolylineTolls, totalTollCost} = await determinateTolls(coordinates, vehicleTypeKey);
-        const {totalCost, totalFuelSpent} = await getRouteCost(totalTollCost, distance, vehicleOctane, vehiclePerformance, originArray)
+        const {nearbyPolylineTolls, totalTollCost} = await determinateTolls(coordinates, vehicleType);
+        const {totalCost, totalFuelSpent} = await getRouteCost(totalTollCost, distance, octane, performance, originArray)
 
         res.json({
             success: true,
