@@ -45,7 +45,7 @@ app.get('/api/v1/coord-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/
         const { coordinates, distance, routeSteps } = await getRoute(originArray, destArray);
         const { nearbyPolylineTolls, totalTollCost } = await determinateTolls(coordinates, vehicleType);
         
-        const { totalCost, totalFuelSpent } = await getRouteCost(
+        const { totalCost, totalFuelSpent, litersNeeded } = await getRouteCost(
             totalTollCost,
             distance,
             octane,
@@ -62,7 +62,8 @@ app.get('/api/v1/coord-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/
             distance,
             tolls: nearbyPolylineTolls,
             routeSteps,
-            polyline: coordinates
+            polyline: coordinates,
+            litersNeeded
         });
 
         registerApiUsage(req.apiKey).catch(console.error);
@@ -120,7 +121,8 @@ app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane
 
         const { coordinates, distance, routeSteps } = await getRoute(originArray, destArray);
         const { nearbyPolylineTolls, totalTollCost } = await determinateTolls(coordinates, vehicleType);
-        const { totalCost, totalFuelSpent } = await getRouteCost(
+        
+        const { totalCost, totalFuelSpent, litersNeeded } = await getRouteCost(
             totalTollCost,
             distance,
             octane,
@@ -137,7 +139,8 @@ app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane
             distance,
             tolls: nearbyPolylineTolls,
             routeSteps,
-            polyline: coordinates
+            polyline: coordinates,
+            litersNeeded
         });
 
         registerApiUsage(req.apiKey).catch(console.error);
