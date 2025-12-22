@@ -23,10 +23,7 @@ app.get("/health", (req, res) => {
 });
 
 // MODO 1 SE LE PASARÁN LAS COORDENADAS DE ORIGEN Y DESTINO
-app.get(
-  '/api/v1/coord-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance',
-  authApiKey,
-  async (req, res) => {
+app.get('/api/v1/coord-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => {
     try {
       const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
 
@@ -82,55 +79,82 @@ app.get(
 
 
 // MODO 2 SE LE PASARÁN LOS NOMBRES DEL LUGAR DE ORIGEN Y DESTINO
-app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => { 
+app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => {
     try {
-        const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
+      const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
 
-        const startCoordinates = await fetchStartCoordinates(origin);
-        const endCoordinates = await fetchEndCoordinates(destination);
-        
-        const vehicleType = Number(vehicleTypeKey);
-        const octane = Number(vehicleOctane);
-        const performance = Number(vehiclePerformance);
+      const startCoordinates = await fetchStartCoordinates(origin);
+      const endCoordinates = await fetchEndCoordinates(destination);
 
-        const originArray = [
-            Number(startCoordinates.lat),
-            Number(startCoordinates.lon)
-        ];
-
-        const destArray = [
-            Number(endCoordinates.lat),
-            Number(endCoordinates.lon)
-        ];
-
-        if (originArray.length !== 2 || destArray.length !== 2) {
-            return res.status(400).json({ error: "Formato de coordenadas inválido. Usa: lat,lng" });
-        }
-
-        const {coordinates, distance, routeSteps} = await getRoute(originArray, destArray);
-        const {nearbyPolylineTolls, totalTollCost} = await determinateTolls(coordinates, vehicleType);
-        const {totalCost, totalFuelSpent} = await getRouteCost(totalTollCost, distance, octane, performance, originArray)
-
-        res.json({
-            success: true,
-            totalTollCost,
-            totalFuelSpent,
-            totalCost,
-            count: nearbyPolylineTolls.length,
-            distance,
-            tolls: nearbyPolylineTolls,
-            routeSteps,
-            polyline: coordinates
+      if (!startCoordinates?.lat || !startCoordinates?.lon) {
+        return res.status(404).json({
+          error: `No se pudo geocodificar el origen: ${origin}`
         });
+      }
 
-        await registerApiUsage(req.apiKey).catch(console.error);
+      if (!endCoordinates?.lat || !endCoordinates?.lon) {
+        return res.status(404).json({
+          error: `No se pudo geocodificar el destino: ${destination}`
+        });
+      }
 
-        
+      const originArray = [
+        Number(startCoordinates.lat),
+        Number(startCoordinates.lon)
+      ];
+
+      const destArray = [
+        Number(endCoordinates.lat),
+        Number(endCoordinates.lon)
+      ];
+
+      const isValidCoord = (arr) =>
+        arr.length === 2 && arr.every(n => !isNaN(n));
+
+      if (!isValidCoord(originArray) || !isValidCoord(destArray)) {
+        return res.status(400).json({
+          error: "Coordenadas inválidas obtenidas desde geocodificación"
+        });
+      }
+
+      const vehicleType = Number(vehicleTypeKey);
+      const octane = Number(vehicleOctane);
+      const performance = Number(vehiclePerformance);
+
+      const { coordinates, distance, routeSteps } = await getRoute(originArray, destArray);
+      const { nearbyPolylineTolls, totalTollCost } = await determinateTolls(coordinates, vehicleType);
+      const { totalCost, totalFuelSpent } = await getRouteCost(
+        totalTollCost,
+        distance,
+        octane,
+        performance,
+        originArray
+      );
+
+      res.json({
+        success: true,
+        totalTollCost,
+        totalFuelSpent,
+        totalCost,
+        count: nearbyPolylineTolls.length,
+        distance,
+        tolls: nearbyPolylineTolls,
+        routeSteps,
+        polyline: coordinates
+      });
+
+      registerApiUsage(req.apiKey).catch(console.error);
+
     } catch (error) {
-        console.error("Error en el endpoint2:", error);
-        res.status(500).json({ error: "Error interno del servidor", error });
+      console.error("Error en /places-mode:", error);
+      res.status(500).json({
+        message: "Error interno del servidor",
+        details: error.message
+      });
     }
-});
+  }
+);
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
