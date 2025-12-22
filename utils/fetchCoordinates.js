@@ -24,47 +24,33 @@ const latinAmericanCountries = [
   "VE", // Venezuela
 ];
 
-export const fetchStartCoordinates = async (term) => {
+export const fetchCoordinates = async (term) => {
     try {
-        const response = await axios.get(`https://eu1.locationiq.com/v1/search.php?key=${apiKeyLocationIq}&q=${term}&format=json&addressdetails=1&countrycodes=${latinAmericanCountries.join(",")}`);
+        const response = await axios.get(
+            `https://eu1.locationiq.com/v1/search.php`,
+            {
+                params: {
+                    key: apiKeyLocationIq,
+                    q: term,
+                    format: "json",
+                    addressdetails: 1,
+                    countrycodes: latinAmericanCountries.join(",")
+                }
+            }
+        );
+
         const location = response.data.find(item => item.lat && item.lon);
 
-        if (location) {
-            const { lat, lon, address } = location;
+        if (!location) return null;
 
-            return { 
-                lat, 
-                lon,
-            };
-        } else {
-            return null;  // Si no encontramos una ubicación válida
-        }
+        return { 
+            lat: Number(location.lat), 
+            lon: Number(location.lon) 
+        };
 
     } catch (error) {
-        console.error("Error al obtener coordenadas:", error);
+        console.error("Error al obtener coordenadas:", error.message);
         return null;
     }
 };
 
-export const fetchEndCoordinates = async (term) => {
-    try {
-        // Hacemos la solicitud de geocoding inverso utilizando el término de búsqueda
-        const response = await axios.get(`https://eu1.locationiq.com/v1/search.php?key=${apiKeyLocationIq}&q=${term}&format=json&addressdetails=1&countrycodes=${latinAmericanCountries.join(",")}`);
-        const location = response.data.find(item => item.lat && item.lon);
-
-        if (location) {
-            const { lat, lon, address } = location;
-            return { 
-                lat, 
-                lon,
-            };
-        } else {
-            return null;  // Si no encontramos una ubicación válida
-        }
-
-    } catch (error) {
-        // Si ocurre algún error, lo capturamos y retornamos null
-        console.error("Error al obtener coordenadas:", error);
-        return null;
-    }
-};
