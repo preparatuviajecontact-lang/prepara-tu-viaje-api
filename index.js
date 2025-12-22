@@ -86,16 +86,12 @@ app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane
       const startCoordinates = await fetchCoordinates(origin);
       const endCoordinates = await fetchCoordinates(destination);
 
-      if (!startCoordinates?.lat || !startCoordinates?.lon) {
-        return res.status(404).json({
-          error: `No se pudo geocodificar el origen: ${origin}`
-        });
+      if (!startCoordinates) {
+        return res.status(404).json({ error: `No se pudo geocodificar el origen: ${origin}` });
       }
-
-      if (!endCoordinates?.lat || !endCoordinates?.lon) {
-        return res.status(404).json({
-          error: `No se pudo geocodificar el destino: ${destination}`
-        });
+      
+      if (!endCoordinates) {
+        return res.status(404).json({ error: `No se pudo geocodificar el destino: ${destination}` });
       }
 
       const originArray = [
