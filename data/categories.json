@@ -1,0 +1,147 @@
+[
+  {
+    "id": 0,
+    "name": "Motos",
+    "subcategory": [
+      "Motos",
+      "Motos y motonetas",
+      "Motos, cuatrimotos y motonetas",
+      "Moto y motoneta"
+    ]
+  },
+  {
+    "id": 1,
+    "name": "Autos y camionetas",
+    "subcategory": [
+      "Autos y camionetas",
+      "Autos, Camionetas y Station Wagon",
+      "Autos, Camionetas, SUV y VAN",
+      "Auto y camioneta sin remolque",
+      "Autos y camionetas, con o sin remolque"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Autos y camionetas con remolque",
+    "subcategory": [
+      "Autos y camionetas con remolque",
+      "Autos con remolque y camionetas con remolque",
+      "Autos, Camionetas y Station Wagon con uno o más ejes adicionales",
+      "Autos, Camionetas, SUV y VAN con remolque",
+      "Auto y camioneta con remolque",
+      "Autos y camionetas, con o sin remolque"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Camionetas de doble rueda trasera",
+    "subcategory": [
+      "Camionetas de doble rueda trasera",
+      "Camiones y Buses de dos ejes, Maquinaria Agrícola, de Construcción y Camionetas doble rueda trasera",
+      "Camiones y buses de dos ejes, maquinaria agrícola, de construcción y camionetas con rueda trasera doble"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Casas rodantes",
+    "subcategory": [
+      "Casas rodantes",
+      "Buses de dos ejes",
+      "Buses de dos ejes que no superen las dimensiones máximas permitidas",
+      "Buses de dos ejes o casas rodantes",
+      "Buses de dos ejes y casas rodantes",
+      "Camiones y Buses de dos ejes, Maquinaria Agrícola, de Construcción y Camionetas doble rueda trasera",
+      "Camiones y buses de dos ejes, maquinaria agrícola, de construcción y camionetas con rueda trasera doble"
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Buses de dos ejes",
+    "subcategory": [
+      "Buses de dos ejes",
+      "Buses de dos ejes que no superen las dimensiones máximas permitidas",
+      "Buses de dos ejes o casas rodantes",
+      "Buses de dos ejes y casas rodantes",
+      "Camiones y Buses de dos ejes, Maquinaria Agrícola, de Construcción y Camionetas doble rueda trasera",
+      "Camiones y buses de dos ejes, maquinaria agrícola, de construcción y camionetas con rueda trasera doble"
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Buses de más de dos ejes",
+    "subcategory": [
+      "Buses de más de dos ejes",
+      "Buses de más de dos ejes que no superen las dimensiones máximas permitidas",
+      "Camiones y Buses de dos ejes, Maquinaria Agrícola, de Construcción y Camionetas doble rueda trasera",
+      "Camiones y buses de dos ejes, maquinaria agrícola, de construcción y camionetas con rueda trasera doble",
+      "Camiones y Buses de más de dos ejes",
+      "Camiones y buses con más de dos ejes"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Camiones de dos ejes",
+    "subcategory": [
+      "Camiones de dos ejes",
+      "Camiones de dos ejes, camionetas de doble rueda trasera, maquinarias agrícolas y maquinarias de construcción que no superen las dimensiones máximas permitidas",
+      "Camiones de dos ejes, maquinaria agrícola y de construcción de dos ejes",
+      "Buses y camiones",
+      "Buses y camiones con remolque",
+      "Camiones y Buses de dos ejes, Maquinaria Agrícola, de Construcción y Camionetas doble rueda trasera",
+      "Camiones y buses de dos ejes, maquinaria agrícola, de construcción y camionetas con rueda trasera doble"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Camiones de más de dos ejes",
+    "subcategory": [
+      "Camiones de más de dos ejes",
+      "Camiones de más de dos ejes que no superen las dimensiones máximas permitidas",
+      "Camiones de más de dos ejes, maquinaria agrícola, maquinaria de construcción de más de dos ejes y vehículos con sobredimensión",
+      "Buses y camiones",
+      "Buses y camiones con remolque",
+      "Camiones y Buses de dos ejes, Maquinaria Agrícola, de Construcción y Camionetas doble rueda trasera",
+      "Camiones y buses de dos ejes, maquinaria agrícola, de construcción y camionetas con rueda trasera doble",
+      "Camiones y Buses de más de dos ejes",
+      "Camiones y buses con más de dos ejes"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Maquinaria agrícola/construcción",
+    "subcategory": [
+      "Maquinaria agrícola/construcción",
+      "Maquinarias agrícolas",
+      "Maquinarias de construcción",
+      "Maquinaria agrícola",
+      "Maquinaria de construcción de más de dos ejes",
+      "Camiones y Buses de dos ejes, Maquinaria Agrícola, de Construcción y Camionetas doble rueda trasera",
+      "Camiones y buses de dos ejes, maquinaria agrícola, de construcción y camionetas con rueda trasera doble"
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Vehículos sobredimensionados",
+    "subcategory": [
+      "Vehículos sobredimensionados",
+      "Vehículos que superan las dimensiones máximas permitidas, con ancho mayor a 2,6 metros y menor o igual a 4,5 metros y/o largo mayor a 23 metros y menor o igual a 30 metros, independiente del número de ejes",
+      "Vehículos que superan las dimensiones máximas permitidas, con ancho mayor a 4,5 metros y/o largo mayor a 30 metros, independiente del número de ejes",
+      "Vehículos con sobredimensión",
+      "Camiones de más de dos ejes",
+      "Camiones de más de dos ejes que no superen las dimensiones máximas permitidas",
+      "Camiones de más de dos ejes, maquinaria agrícola, maquinaria de construcción de más de dos ejes y vehículos con sobredimensión",
+      "Buses y camiones",
+      "Buses y camiones con remolque",
+      "Camiones y Buses de dos ejes, Maquinaria Agrícola, de Construcción y Camionetas doble rueda trasera",
+      "Camiones y buses de dos ejes, maquinaria agrícola, de construcción y camionetas con rueda trasera doble",
+      "Camiones y Buses de más de dos ejes",
+      "Camiones y buses con más de dos ejes",
+      "Maquinarias agrícolas",
+      "Maquinarias de construcción",
+      "Maquinaria agrícola",
+      "Maquinaria de construcción de más de dos ejes",
+      "Camiones y Buses de dos ejes, Maquinaria Agrícola, de Construcción y Camionetas doble rueda trasera",
+      "Camiones y buses de dos ejes, maquinaria agrícola, de construcción y camionetas con rueda trasera doble"
+    ]
+  }
+]

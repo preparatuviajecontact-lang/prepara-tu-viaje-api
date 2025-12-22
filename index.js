@@ -1,0 +1,113 @@
+import cors from "cors";
+import express from 'express';
+import { getRoute } from "./utils/getRoute.js";
+import { determinateTolls } from "./utils/determinateTolls.js";
+import { getRouteCost } from './utils/getRouteCost.js';
+import { fetchStartCoordinates, fetchEndCoordinates } from './utils/fetchCoordinates.js';
+import { registerApiUsage } from './utils/registerApiUsage.js';
+import { authApiKey } from './middlewares/auth.js';
+
+const app = express();
+app.use(express.json());
+app.use(cors({
+  origin: [
+    "https://preparatuviajeapp.com",
+    "https://www.preparatuviajeapp.com",
+  ],
+  allowedHeaders: ["Content-Type", "x-api-key"]
+}));
+
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+// MODO 1 SE LE PASARÁN LAS COORDENADAS DE ORIGEN Y DESTINO
+app.get('/api/v1/coord-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => { 
+    
+    try {
+        const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
+
+        const originArray = origin.split(',').map(Number);
+        const destArray = destination.split(',').map(Number);
+
+        if (originArray.length !== 2 || destArray.length !== 2) {
+            return res.status(400).json({ error: "Formato de coordenadas inválido. Usa: lat,lng" });
+        }
+
+        const {coordinates, distance, routeSteps} = await getRoute(originArray, destArray);
+        const {nearbyPolylineTolls, totalTollCost} = await determinateTolls(coordinates, vehicleTypeKey);
+        const {totalCost, totalFuelSpent} = await getRouteCost(totalTollCost, distance, vehicleOctane, vehiclePerformance, originArray)
+
+        res.json({
+            success: true,
+            totalTollCost,
+            totalFuelSpent,
+            totalCost,
+            count: nearbyPolylineTolls.length,
+            distance,
+            tolls: nearbyPolylineTolls,
+            routeSteps,
+            polyline: coordinates
+        });
+
+        await registerApiUsage(req.apiKey).catch(console.error);
+
+
+    } catch (error) {
+        console.error("Error en el endpoint1:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+// MODO 2 SE LE PASARÁN LOS NOMBRES DEL LUGAR DE ORIGEN Y DESTINO
+app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => { 
+    try {
+        const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
+
+        const startCoordinates = await fetchStartCoordinates(origin);
+        const endCoordinates = await fetchEndCoordinates(destination);
+        
+        const originArray = [
+            Number(startCoordinates.lat),
+            Number(startCoordinates.lon)
+        ];
+
+        const destArray = [
+            Number(endCoordinates.lat),
+            Number(endCoordinates.lon)
+        ];
+
+        if (originArray.length !== 2 || destArray.length !== 2) {
+            return res.status(400).json({ error: "Formato de coordenadas inválido. Usa: lat,lng" });
+        }
+
+        const {coordinates, distance, routeSteps} = await getRoute(originArray, destArray);
+        const {nearbyPolylineTolls, totalTollCost} = await determinateTolls(coordinates, vehicleTypeKey);
+        const {totalCost, totalFuelSpent} = await getRouteCost(totalTollCost, distance, vehicleOctane, vehiclePerformance, originArray)
+
+        res.json({
+            success: true,
+            totalTollCost,
+            totalFuelSpent,
+            totalCost,
+            count: nearbyPolylineTolls.length,
+            distance,
+            tolls: nearbyPolylineTolls,
+            routeSteps,
+            polyline: coordinates
+        });
+
+        await registerApiUsage(req.apiKey).catch(console.error);
+
+        
+    } catch (error) {
+        console.error("Error en el endpoint2:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor API listo en puerto ${PORT}`);
+});
