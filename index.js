@@ -67,14 +67,24 @@ app.get('/api/v1/coord-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/
 // MODO 2 SE LE PASARÁN LOS NOMBRES DEL LUGAR DE ORIGEN Y DESTINO
 app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => { 
     try {
-        const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
+        const { vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
 
-        const startCoordinates = await fetchStartCoordinates(origin);
-        const endCoordinates = await fetchEndCoordinates(destination);
+        const originDecoded = decodeURIComponent(origin);
+        const destinationDecoded = decodeURIComponent(destination);
+
+        const startCoordinates = await fetchStartCoordinates(originDecoded);
+        const endCoordinates = await fetchEndCoordinates(destinationDecoded);
+
+        if (!startCoordinates || !endCoordinates) {
+            return res.status(400).json({
+                error: "No se pudieron resolver las coordenadas del lugar"
+            });
+        }
         
         const vehicleType = Number(vehicleTypeKey);
         const octane = Number(vehicleOctane);
         const performance = Number(vehiclePerformance);
+
 
         const originArray = [
             Number(startCoordinates.lat),
