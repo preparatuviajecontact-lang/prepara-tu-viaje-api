@@ -24,8 +24,6 @@ export const verifyApiKey = async (apiKey) => {
         const usage = Number(fields.usage.integerValue);
         const limit = Number(fields.limit.integerValue);
         const active = fields.active.booleanValue;
-        const billPeriod = new Date(fields.billPeriod.timestampValue);
-        const now = new Date();
 
         let result;
 
@@ -34,16 +32,12 @@ export const verifyApiKey = async (apiKey) => {
         } else if (usage >= limit) {
             result = { valid: false, reason: "Límite excedido" };
         } 
-        // else if (billPeriod < now) {
-            // result = { valid: false, reason: "Periodo vencido" };
-        // } 
         else {
             result = {
                 valid: true,
                 plan: fields.plan.stringValue,
                 usage,
                 limit,
-                billPeriod
             };
         }
 
@@ -52,7 +46,7 @@ export const verifyApiKey = async (apiKey) => {
     } catch (error) {
         return {
             valid: false,
-            reason: "Error interno"
+            reason: "Error interno", error
         };
     }
 };
