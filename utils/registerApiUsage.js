@@ -4,6 +4,10 @@ export const registerApiUsage = async (apiKey) => {
     const documentPath = `projects/${projectId}/databases/(default)/documents/companies/company_${apiKey}`;
     const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:commit`;
 
+    const now = new Date();
+    const monthKey = `usage_${now.getFullYear()}_${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const dayKey = String(now.getDate());
+
     try {
         const response = await fetch(url, {
             method: "POST",
@@ -16,11 +20,15 @@ export const registerApiUsage = async (apiKey) => {
                         transform: {
                             document: documentPath,
                             fieldTransforms: [
+                                // Increment general usage
                                 {
                                     fieldPath: "usage",
-                                    increment: {
-                                        integerValue: "1"
-                                    }
+                                    increment: { integerValue: "1" }
+                                },
+                                // Increment daily usage dentro del mes
+                                {
+                                    fieldPath: `${monthKey}.${dayKey}`,
+                                    increment: { integerValue: "1" }
                                 }
                             ]
                         }
