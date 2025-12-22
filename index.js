@@ -3,7 +3,7 @@ import express from 'express';
 import { getRoute } from "./utils/getRoute.js";
 import { determinateTolls } from "./utils/determinateTolls.js";
 import { getRouteCost } from './utils/getRouteCost.js';
-import { fetchStartCoordinates, fetchEndCoordinates } from './utils/fetchCoordinates.js';
+import { fetchCoordinates } from './utils/fetchCoordinates.js';
 import { registerApiUsage } from './utils/registerApiUsage.js';
 import { authApiKey } from './middlewares/auth.js';
 
@@ -83,8 +83,8 @@ app.get('/api/v1/places-mode/:origin/:destination/:vehicleTypeKey/:vehicleOctane
     try {
       const { origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
 
-      const startCoordinates = await fetchStartCoordinates(origin);
-      const endCoordinates = await fetchEndCoordinates(destination);
+      const startCoordinates = await fetchCoordinates(origin);
+      const endCoordinates = await fetchCoordinates(destination);
 
       if (!startCoordinates?.lat || !startCoordinates?.lon) {
         return res.status(404).json({
