@@ -4,8 +4,10 @@ export const getRouteCost = async (totalTollCost, distance, vehicleOctane, vehic
 
     // Combustible necesario (litros)
     const getLitersNeeded = () => {
-        return Number(distance) / Number(vehiclePerformance);
+        const liters = Number(distance) / Number(vehiclePerformance);
+        return Number(liters.toFixed(2));
     };
+
     const litersNeeded = getLitersNeeded();
 
     // Precio del combustible (valor numérico)
