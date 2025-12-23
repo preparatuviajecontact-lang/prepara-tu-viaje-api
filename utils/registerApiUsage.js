@@ -1,7 +1,8 @@
 import { projectId } from "../src/config/config.js";
 
-export const registerApiUsage = async (apiKey) => {
-    const documentPath = `projects/${projectId}/databases/(default)/documents/companies/company_${apiKey}`;
+export const registerApiUsage = async (companyId) => {
+    // Path del documento correcto
+    const documentPath = `projects/${projectId}/databases/(default)/documents/companies/company_${companyId}`;
     const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:commit`;
 
     const now = new Date();
@@ -17,19 +18,12 @@ export const registerApiUsage = async (apiKey) => {
             body: JSON.stringify({
                 writes: [
                     {
+                        // Transform asegura que solo actualiza campos existentes
                         transform: {
                             document: documentPath,
                             fieldTransforms: [
-                                // Increment general usage
-                                {
-                                    fieldPath: "usage",
-                                    increment: { integerValue: "1" }
-                                },
-                                // Increment daily usage dentro del mes
-                                {
-                                    fieldPath: `${monthKey}.${dayKey}`,
-                                    increment: { integerValue: "1" }
-                                }
+                                { fieldPath: "usage", increment: { integerValue: "1" } },
+                                { fieldPath: `\`${monthKey}\`.\`${dayKey}\``, increment: { integerValue: "1" } }
                             ]
                         }
                     }
