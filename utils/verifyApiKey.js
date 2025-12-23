@@ -1,8 +1,7 @@
 import { projectId } from "../src/config/config.js";
 
-export const verifyApiKey = async (apiKey) => {
-
-    const documentPath = `companies/company_${apiKey}`;
+export const verifyApiKey = async (apiKey, companyId) => {
+    const documentPath = `companies/company_${companyId}`;
 
     try {
         const response = await fetch(
@@ -12,41 +11,40 @@ export const verifyApiKey = async (apiKey) => {
         const data = await response.json();
 
         if (!data.fields) {
-            const result = {
-                valid: false,
-                reason: "API Key no encontrada"
-            };
-            return result;
+            return { valid: false, reason: "Empresa no encontrada" };
         }
 
         const fields = data.fields;
 
-        const usage = Number(fields.usage.integerValue);
-        const limit = Number(fields.limit.integerValue);
-        const active = fields.active.booleanValue;
-
-        let result;
-
-        if (!active) {
-            result = { valid: false, reason: "API Key desactivada" };
-        } else if (usage >= limit) {
-            result = { valid: false, reason: "Límite excedido" };
-        } 
-        else {
-            result = {
-                valid: true,
-                plan: fields.plan.stringValue,
-                usage,
-                limit,
-            };
+        // Verificar que la apiKey coincide
+        if (!fields.apiKey || fields.apiKey.stringValue !== apiKey) {
+            return { valid: false, reason: "API Key inválida" };
         }
 
-        return result;
+        const usage = Number(fields.usage.integerValue || 0);
+        const limit = Number(fields.limit.integerValue || 0);
+        const active = fields.active.booleanValue;
+
+        if (!active) {
+            return { valid: false, reason: "API Key desactivada" };
+        }
+
+        if (usage >= limit) {
+            return { valid: false, reason: "Límite excedido" };
+        }
+
+        return {
+            valid: true,
+            plan: fields.plan.stringValue,
+            usage,
+            limit,
+        };
 
     } catch (error) {
         return {
             valid: false,
-            reason: "Error interno", error
+            reason: "Error interno",
+            error: error.message
         };
     }
 };
