@@ -2,6 +2,7 @@ import { cneEmail, cnePassword } from '../src/config/config.js';
 import { getCachedFuelPrices, setCachedFuelPrices } from "../cache/fuelPriceCache.js";
 import { getCachedCneToken, setCachedCneToken } from "../cache/cneTokenCache.js";
 
+// NO BORRAR PARA LA API LUEGO
 const regionsAndCode = [
     {name:'Tarapacá', code:'01'},
     {name:'Antofagasta', code:'02'},
@@ -20,74 +21,8 @@ const regionsAndCode = [
     {name:'Arica y Parinacota', code:'15'},
     {name:'Ñuble', code:'16'},
 ]
+
 const extraerPrecio = (precio) => (precio ? parseFloat(precio.precio) : null);
-
-const getUserRegionCode = async (locationArray) => {
-
-    const [lat, lng] = [locationArray[0], locationArray[1]];
-
-    if (!lat || !lng) {
-        throw new Error("Coordenadas requeridas");
-    }
-
-    const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
-        {
-            headers: {
-                "User-Agent": "your-api-name"
-            }
-        }
-    );
-
-    if (!response.ok) {
-        throw new Error("Error en reverse geocoding");
-    }
-
-    const data = await response.json();
-
-    // Chile
-    const userRegionName =
-        data.address?.state ||
-        data.address?.region ||
-        data.address?.state_district;
-
-    if (!userRegionName) {
-        throw new Error("No se pudo determinar la región");
-    }
-
-    // Normalización
-    const normalize = str =>
-        str.toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-z\s]/g, "");
-
-    const normalizedUserRegion = normalize(userRegionName).split(" ");
-
-    let bestMatch = null;
-    let maxMatchCount = 0;
-
-    regionsAndCode.forEach(region => {
-        const normalizedRegionName = normalize(region.name).split(" ");
-        const matchCount = normalizedRegionName.filter(word =>
-            normalizedUserRegion.includes(word)
-        ).length;
-
-        if (matchCount > maxMatchCount) {
-            maxMatchCount = matchCount;
-            bestMatch = region;
-        }
-    });
-
-    if (!bestMatch) {
-        throw new Error(`Región no encontrada: ${userRegionName}`);
-    }
-
-    return {
-        regionCode: bestMatch.code, 
-        userRegionName
-    };
-};
 
 const getCneToken = async () => {
     const cached = getCachedCneToken();
@@ -132,9 +67,9 @@ const getCneToken = async () => {
     }
 };
 
-export const getFuelPrices = async (locationArray) => {
+export const getFuelPrices = async (regionCode) => {
+
     try {
-        const { regionCode, userRegionName } = await getUserRegionCode(locationArray);
 
         const cached = getCachedFuelPrices(regionCode);
         if (cached) {
@@ -150,6 +85,7 @@ export const getFuelPrices = async (locationArray) => {
             "https://api.cne.cl/api/v4/estaciones",
             { method: 'GET', headers }
         );
+
 
         if (!response.ok)
             throw new Error(`Error API CNE: ${response.status}`);
@@ -187,7 +123,6 @@ export const getFuelPrices = async (locationArray) => {
 
         const result = {
             fuelData,
-            userRegionName,
             regionCode
         };
 
@@ -200,7 +135,3 @@ export const getFuelPrices = async (locationArray) => {
         return null;
     }
 };
-
-
-
-
