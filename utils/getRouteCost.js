@@ -1,12 +1,6 @@
 import { getFuelPrices } from "./getFuelPrices.js";
 
-export const getRouteCost = async (
-  totalTollCost,
-  distance,
-  vehicleOctane,
-  vehiclePerformance,
-  originArray
-) => {
+export const getRouteCost = async ( totalTollCost, distance, vehicleOctane, vehiclePerformance, regionCode) => {
 
   try {
     // Litros necesarios
@@ -15,7 +9,7 @@ export const getRouteCost = async (
     );
 
     // Obtener precios
-    const fuelPrices = await getFuelPrices(originArray);
+    const fuelPrices = await getFuelPrices(regionCode);
 
     // ALIDACIÓN CRÍTICA
     if (!fuelPrices || !Array.isArray(fuelPrices.fuelData)) {
