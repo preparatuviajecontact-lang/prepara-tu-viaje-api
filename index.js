@@ -8,7 +8,6 @@ import { registerApiUsage } from './utils/registerApiUsage.js';
 import { authApiKey } from './middlewares/auth.js';
 
 const app = express();
-
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -22,9 +21,9 @@ app.get("/health", (req, res) => {
 });
 
 // MODO 1 SE LE PASARÁN LAS COORDENADAS DE ORIGEN Y DESTINO
-app.get('/api/v1/coord-mode/:companyId/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => {
+app.get('/api/v1/coord-mode/:companyId/:origin/:destination/:regionCode/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => {
     try {
-        const { companyId, origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
+        const { companyId, origin, destination, regionCode, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
 
         const originArray = origin.split(',').map(Number);
         const destArray = destination.split(',').map(Number);
@@ -50,7 +49,8 @@ app.get('/api/v1/coord-mode/:companyId/:origin/:destination/:vehicleTypeKey/:veh
             distance,
             octane,
             performance,
-            originArray
+            originArray,
+            regionCode
         );
 
         res.json({
@@ -80,9 +80,9 @@ app.get('/api/v1/coord-mode/:companyId/:origin/:destination/:vehicleTypeKey/:veh
 );
 
 // MODO 2 SE LE PASARÁN LOS NOMBRES DEL LUGAR DE ORIGEN Y DESTINO
-app.get('/api/v1/places-mode/:companyId/:origin/:destination/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => {
+app.get('/api/v1/places-mode/:companyId/:origin/:destination/:regionCode/:vehicleTypeKey/:vehicleOctane/:vehiclePerformance', authApiKey, async (req, res) => {
     try {
-        const { companyId, origin, destination, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
+        const { companyId, origin, destination, regionCode, vehicleTypeKey, vehicleOctane, vehiclePerformance } = req.params;
 
         const startCoordinates = await fetchCoordinates(origin);
         const endCoordinates = await fetchCoordinates(destination);
@@ -122,13 +122,7 @@ app.get('/api/v1/places-mode/:companyId/:origin/:destination/:vehicleTypeKey/:ve
         const { coordinates, distance, routeSteps } = await getRoute(originArray, destArray);
         const { nearbyPolylineTolls, totalTollCost } = await determinateTolls(coordinates, vehicleType);
 
-        const { totalCost, totalFuelSpent, litersNeeded, fuelPrice } = await getRouteCost(
-            totalTollCost,
-            distance,
-            octane,
-            performance,
-            originArray
-        );
+        const { totalCost, totalFuelSpent, litersNeeded, fuelPrice } = await getRouteCost( totalTollCost, distance, octane, performance, regionCode);
 
         res.json({
             success: true,
@@ -159,6 +153,4 @@ app.get('/api/v1/places-mode/:companyId/:origin/:destination/:vehicleTypeKey/:ve
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor API listo en puerto ${PORT}`);
-
 });
-
