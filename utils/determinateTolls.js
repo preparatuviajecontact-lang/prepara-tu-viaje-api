@@ -61,7 +61,16 @@ export const determinateTolls = async (routeCoordinates, vehicleTypeKey) => {
             }
         }
 
-        return { nearbyPolylineTolls, totalTollCost };
+
+        const sanitizedNearbyPolylineTolls = nearbyPolylineTolls.map(
+            ({ taxes, ...rest }) => rest
+        );
+
+        return {
+            nearbyPolylineTolls: sanitizedNearbyPolylineTolls,
+            totalTollCost
+        };
+
     } catch (error) {
         console.error("Error en determinateTolls:", error);
         return { nearbyPolylineTolls: [], totalTollCost: 0 };
