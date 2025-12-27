@@ -8,10 +8,16 @@ import { registerApiUsage } from './utils/registerApiUsage.js';
 import { authApiKey } from './middlewares/auth.js';
 
 const app = express();
-app.use(express.json());
+
 app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "x-api-key"]
 }));
+
+app.options("*", cors());
+
+app.use(express.json());
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
@@ -155,4 +161,5 @@ app.get('/api/v1/places-mode/:companyId/:origin/:destination/:vehicleTypeKey/:ve
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor API listo en puerto ${PORT}`);
+
 });
