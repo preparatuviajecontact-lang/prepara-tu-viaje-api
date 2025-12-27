@@ -10,10 +10,6 @@ import { authApiKey } from './middlewares/auth.js';
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: [
-    "https://preparatuviajeapp.com",
-    "https://www.preparatuviajeapp.com",
-  ],
   allowedHeaders: ["Content-Type", "x-api-key"]
 }));
 
@@ -45,7 +41,7 @@ app.get('/api/v1/coord-mode/:companyId/:origin/:destination/:vehicleTypeKey/:veh
         const { coordinates, distance, routeSteps } = await getRoute(originArray, destArray);
         const { nearbyPolylineTolls, totalTollCost } = await determinateTolls(coordinates, vehicleType);
         
-        const { totalCost, totalFuelSpent, litersNeeded } = await getRouteCost(
+        const { totalCost, totalFuelSpent, litersNeeded, fuelPrice } = await getRouteCost(
             totalTollCost,
             distance,
             octane,
@@ -58,12 +54,13 @@ app.get('/api/v1/coord-mode/:companyId/:origin/:destination/:vehicleTypeKey/:veh
             totalTollCost,
             totalFuelSpent,
             totalCost,
+            litersNeeded,
+            fuelPrice,
             count: nearbyPolylineTolls.length,
             distance,
             tolls: nearbyPolylineTolls,
             routeSteps,
             polyline: coordinates,
-            litersNeeded
         });
 
         registerApiUsage(companyId).catch(console.error);
@@ -121,7 +118,7 @@ app.get('/api/v1/places-mode/:companyId/:origin/:destination/:vehicleTypeKey/:ve
         const { coordinates, distance, routeSteps } = await getRoute(originArray, destArray);
         const { nearbyPolylineTolls, totalTollCost } = await determinateTolls(coordinates, vehicleType);
 
-        const { totalCost, totalFuelSpent, litersNeeded } = await getRouteCost(
+        const { totalCost, totalFuelSpent, litersNeeded, fuelPrice } = await getRouteCost(
             totalTollCost,
             distance,
             octane,
@@ -134,12 +131,13 @@ app.get('/api/v1/places-mode/:companyId/:origin/:destination/:vehicleTypeKey/:ve
             totalTollCost,
             totalFuelSpent,
             totalCost,
+            litersNeeded,
+            fuelPrice,
             count: nearbyPolylineTolls.length,
             distance,
             tolls: nearbyPolylineTolls,
             routeSteps,
             polyline: coordinates,
-            litersNeeded
         });
 
         registerApiUsage(companyId).catch(console.error);

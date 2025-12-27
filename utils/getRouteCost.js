@@ -26,9 +26,9 @@ export const getRouteCost = async (totalTollCost, distance, vehicleOctane, vehic
         return Math.round(Number(raw));
     };
 
+    const fuelPrice = await getFuelPrice();
 
     const getTotalFuelSpent = async () => {
-        const fuelPrice = await getFuelPrice();
         return Math.round(litersNeeded * fuelPrice);
     };
 
@@ -45,7 +45,8 @@ export const getRouteCost = async (totalTollCost, distance, vehicleOctane, vehic
         return {
             totalCost: Math.round(result),
             totalFuelSpent,
-            litersNeeded
+            litersNeeded,
+            fuelPrice
         };
 
     } catch (error) {
