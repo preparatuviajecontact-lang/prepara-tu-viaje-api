@@ -11,7 +11,7 @@ export const getRouteCost = async ( totalTollCost, distance, vehicleOctane, vehi
     // Obtener precios
     const fuelPrices = await getFuelPrices(regionCode);
 
-    // ALIDACIÓN CRÍTICA
+    // VALIDACIÓN CRÍTICA
     if (!fuelPrices || !Array.isArray(fuelPrices.fuelData)) {
       return {
         totalCost: Math.round(totalTollCost),
@@ -37,7 +37,7 @@ export const getRouteCost = async ( totalTollCost, distance, vehicleOctane, vehi
     }
 
     const fuelPrice = Math.round(
-      Number(fuel.price.replace(/[^\d]/g, ""))
+        Number(fuel.price.replace(/[^0-9.]/g, ""))
     );
 
     const totalFuelSpent = Math.round(litersNeeded * fuelPrice);
