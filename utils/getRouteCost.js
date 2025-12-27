@@ -1,55 +1,71 @@
 import { getFuelPrices } from "./getFuelPrices.js";
 
-export const getRouteCost = async (totalTollCost, distance, vehicleOctane, vehiclePerformance, originArray) => {
+export const getRouteCost = async (
+  totalTollCost,
+  distance,
+  vehicleOctane,
+  vehiclePerformance,
+  originArray
+) => {
 
-    // Combustible necesario (litros)
-    const getLitersNeeded = () => {
-        const liters = Number(distance) / Number(vehiclePerformance);
-        return Number(liters.toFixed(2));
-    };
+  try {
+    // Litros necesarios
+    const litersNeeded = Number(
+      (Number(distance) / Number(vehiclePerformance)).toFixed(2)
+    );
 
-    const litersNeeded = getLitersNeeded();
+    // Obtener precios
+    const fuelPrices = await getFuelPrices(originArray);
 
-    // Precio del combustible (valor numérico)
-    const getFuelPrice = async () => {
-        const fuelPrices = await getFuelPrices(originArray);
-
-        const fuel = fuelPrices.fuelData.find(f =>
-            f.fuelType.startsWith(vehicleOctane.toString())
-        );
-
-        if (!fuel) {
-            throw new Error(`No se encontró precio para octanaje ${vehicleOctane}`);
-        }
-
-        const raw = fuel.price.replace('$', '');
-        return Math.round(Number(raw));
-    };
-
-    const fuelPrice = await getFuelPrice();
-
-    const getTotalFuelSpent = async () => {
-        return Math.round(litersNeeded * fuelPrice);
-    };
-
-    const totalFuelSpent = await getTotalFuelSpent()
-
-    const getTotalCost = async () => {
-        const totalFuelCost = totalFuelSpent
-        return Number(totalTollCost) + totalFuelCost;
-    };
-
-    try {
-        const result = await getTotalCost();
-
-        return {
-            totalCost: Math.round(result),
-            totalFuelSpent,
-            litersNeeded,
-            fuelPrice
-        };
-
-    } catch (error) {
-        console.error(error);
+    // ALIDACIÓN CRÍTICA
+    if (!fuelPrices || !Array.isArray(fuelPrices.fuelData)) {
+      return {
+        totalCost: Math.round(totalTollCost),
+        totalFuelSpent: null,
+        litersNeeded,
+        fuelPrice: null,
+        warning: "No hay datos de combustible para esta zona"
+      };
     }
+
+    const fuel = fuelPrices.fuelData.find(f =>
+      f.fuelType.startsWith(vehicleOctane.toString())
+    );
+
+    if (!fuel || !fuel.price) {
+      return {
+        totalCost: Math.round(totalTollCost),
+        totalFuelSpent: null,
+        litersNeeded,
+        fuelPrice: null,
+        warning: `No se encontró combustible ${vehicleOctane}`
+      };
+    }
+
+    const fuelPrice = Math.round(
+      Number(fuel.price.replace(/[^\d]/g, ""))
+    );
+
+    const totalFuelSpent = Math.round(litersNeeded * fuelPrice);
+    const totalCost = Number(totalTollCost) + totalFuelSpent;
+
+    return {
+      totalCost: Math.round(totalCost),
+      totalFuelSpent,
+      litersNeeded,
+      fuelPrice
+    };
+
+  } catch (error) {
+    console.error("Error en getRouteCost:", error);
+
+    // Fallback seguro
+    return {
+      totalCost: Math.round(totalTollCost),
+      totalFuelSpent: null,
+      litersNeeded: null,
+      fuelPrice: null,
+      error: "No se pudo calcular el costo de combustible"
+    };
+  }
 };
