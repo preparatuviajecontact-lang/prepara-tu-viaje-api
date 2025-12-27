@@ -1,6 +1,11 @@
 import { verifyApiKey } from '../utils/verifyApiKey.js';
 
 export const authApiKey = async (req, res, next) => {
+
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+    }
+    
     const apiKey = req.headers["x-api-key"];
     const { companyId } = req.params;
 
@@ -31,3 +36,4 @@ export const authApiKey = async (req, res, next) => {
     req.companyId = companyId;
     next();
 };
+
